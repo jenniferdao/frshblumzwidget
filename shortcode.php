@@ -2,12 +2,17 @@
 	
 /*
 * Plugin Name: Flower Post by Team Panda JZ
-* Description: A widget to display the yearly archives.
+* Description: A widget to display custom-post types, categorized by most recent posts with a featured image displayed and an options for how many posts to be shown.
 * Plugin URI: http://phoenix.sheridanc.on.ca/~ccit3430
 * Author: Jennifer Dao & Zubin Khan
-* Author URI: http://phoenix.sheridanc.on.ca/~ccit3430*Hook the function register_my_post to function init.
+* Author URI: http://phoenix.sheridanc.on.ca/~ccit3430
 * Version: v1.0
 */
+//Calls the CSS file to the plugin for the accompanied styling
+function teampandajz_plugin_enqueue_scripts (){
+		wp_enqueue_style ('plugin', plugins_url ('frshblumz/css/style.css')); 
+	}
+add_action( 'wp_enqueue_scripts','teampandajz_plugin_enqueue_scripts' );
 
 /*
 *Register the custom post type for the slider. This will also add an array of settings to the new custom post type.
@@ -71,7 +76,7 @@ class teampandajz_widget extends WP_Widget {
 			echo $args['before_title'] . $title . $args['after_title'];
 		
 		// Display Post
-		echo "teampandajz: ";
+		echo "Check these out!";
 			$args = array('post_type'=>'flowerpost', 'posts_per_page'=>$number);
 			$query = new WP_Query($args);
 			if ($query ->have_posts() ) {
@@ -228,13 +233,3 @@ function flowerpost_shortcode($stts){
 	}
 }
 
-add_action( 'wp_enqueue_scripts', 'register_flowerpost_styles' );
-
-/**
- * Register style sheet.
- */
-function register_flowerpost_styles() {
-	wp_register_style( 'flowerpost-plugin', plugins_url( '/home/ccit3430/public_html/wp-content/plugins/frshblumz/css/style.css' ) );
-	wp_enqueue_style( 'flowerpost-plugin' );
-}
-?>
