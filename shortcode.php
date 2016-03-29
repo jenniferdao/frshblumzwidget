@@ -1,108 +1,220 @@
 <?php
 	
 /*
-* Plugin Name: Team Panda JZ Plugin
+* Plugin Name: Flower Post by Team Panda JZ
 * Description: A widget to display the yearly archives.
 * Plugin URI: http://phoenix.sheridanc.on.ca/~ccit3430
 * Author: Jennifer Dao & Zubin Khan
 * Author URI: http://phoenix.sheridanc.on.ca/~ccit3430
 * Version: v1.0
 */
+//Calls the CSS file to the plugin
+function teampandajz_plugin_enqueue_scripts (){
+		wp_enqueue_style ('plugin', plugins_url ('frshblumz/css/freshblumzstyles.css')); 
+	} style.
+add_action( 'wp_enqueue_scripts','teampandajz_plugin_enqueue_scripts' );
+/*
+*Register the custom post type for the slider. This will also add an array of settings to the new custom post type.
+*/
+add_action('init','register_my_post');
+function register_my_post() {
+	register_post_type('flowerpost',
+		array(
+			'labels' => array(
+				'name' => ('flowerpost'),
+				'singular_name' => 'Flowers',
+				'add_new' => 'Add New Flower',
+				'add_new_item' => 'Add New Post',
+				'edit_item' => 'Edit',
+				'new_item' => 'New',
+				'all_items' => 'All',
+				'view_items' => 'View',
+				'search_items' => 'Search',
+				'not_found' => 'Not found',
+				'not_found_in_trash' => 'None in Trash',
+				'parent_item_colon' => '',
+				),
+			'public' => true,
+			'exclude_from_search' => true,
+			//Enables the post to support a title, thumbnail and editor.
+			'supports' => array(
+				'title',
+				'thumbnail',
+				'editor'
+				)
+			)
+		);
+}
 
+class teampandajz_widget extends WP_Widget {
 
-// This will begin to build the widget 
-class TeamPandaJZYearlyArchivesWidget extends WP_Widget {
-	
-	// Will start the widget function
-	public function __construct() {
-		$widget_ops = array('classname' => 'widget_archive', 'description' => __( 'A yearly archive of your site&#8217;s Posts.') );
-		// Adds a class to the widget and provides a description on the Widget page to describe what the widget does.
-		parent::__construct('yearly_archives', __('Yearly Archives', 'teampandajz'), $widget_ops);
+	function __construct() {
+		parent::__construct('teampandajz_widget', __('teampandajz Widget', 'teampandajz_widget_domain'), array( 'description' => __( 'teampandajz widget', 'teampandajz_widget_domain' ), )
+		);
 	}
-	
-	// Determines what will appear on the site
+
+	// Creating widget front-end
 	public function widget( $args, $instance ) {
-		$c = ! empty( $instance['count'] ) ? '1' : '0'; 
-		//sets a variable for whether or not the 'Count' option is checked
-		$d = ! empty( $instance['dropdown'] ) ? '1' : '0';
-		// sets a variable for whether or not the 'Dropdown' option is checked
-		$title = apply_filters('widget_title', empty($instance['title']) ? __('Yearly Archives', 'teampandajz') : $instance['title'], $instance, $this->id_base); 
-		// Determines if there's a user-provided title and if not, displays a default title.
+	
+		$title = apply_filters( 'widget_title', $instance['title'] );
+		$number = get_option('flowerpost_show_settype',0) == 0 ? $instance['number'] : get_option('flowerpost_show_number',3);
 		
-		echo $args['before_widget']; // what's set up when you registered the sidebar
-		
-		if ( $title ) {
+		// before and after widget arguments are defined by themes
+		echo $args['before_widget'];
+		if ( ! empty( $title ) )
 			echo $args['before_title'] . $title . $args['after_title'];
-		}
-
-	if ( $d ) {
-		//if the dropdown option is checked, gets a list of the archives and displays them by year in a dropdown list. 
-		$dropdown_id = "{$this->id_base}-dropdown-{$this->number}";
-?>
-		<label class="screen-reader-text" for="<?php echo esc_attr( $dropdown_id ); ?>"><?php echo $title; ?></label>
-		<select id="<?php echo esc_attr( $dropdown_id ); ?>" name="archive-dropdown" onchange='document.location.href=this.options[this.selectedIndex].value;'>
-			
-		<?php	$dropdown_args = apply_filters( 'widget_archives_dropdown_args', array(
-				'type'            => 'yearly',
-				'format'          => 'option',
-				'show_post_count' => $c // If post count checked, show the post count
-			) );
-		?>	
-			<option value="<?php echo __( 'Select Year', 'teampandajz' ); ?>"><?php echo __( 'Select Year', 'teampandajz' ); ?></option>
-			<?php wp_get_archives( $dropdown_args ); ?>
-		</select>
-<?php
-	} else {
-		// If (d) not selected, show this:
-?>
-		<ul>
-		<?php 
-			wp_get_archives( apply_filters( 'widget_archives_args', array(
-			'type'            => 'yearly',
-			'show_post_count' => $c
-		) ) ); 
-			// gets a list of the archives and displays them by year. If the Count option is checked, this gets shown.
-		?>
-		</ul>
-
-<?php
-		}
 		
-		echo $args['after_widget']; // what's set up when you registered the sidebar
-	}
-	
-	// Sets up the form for users to set their options/add content in the widget admin page
-	
-	public function form( $instance ) {
-		$instance = wp_parse_args( (array) $instance, array( 'title' => '', 'count' => 0, 'dropdown' => '') );
-		$title = strip_tags($instance['title']);
-		$count = $instance['count'] ? 'checked="checked"' : '';
-		$dropdown = $instance['dropdown'] ? 'checked="checked"' : '';
-?>
-		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label> <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" /></p>
-		<p>
-			<input class="checkbox" type="checkbox" <?php echo $dropdown; ?> id="<?php echo $this->get_field_id('dropdown'); ?>" name="<?php echo $this->get_field_name('dropdown'); ?>" /> <label for="<?php echo $this->get_field_id('dropdown'); ?>"><?php _e('Display as dropdown'); ?></label>
-			<br/>
-			<input class="checkbox" type="checkbox" <?php echo $count; ?> id="<?php echo $this->get_field_id('count'); ?>" name="<?php echo $this->get_field_name('count'); ?>" /> <label for="<?php echo $this->get_field_id('count'); ?>"><?php _e('Show post counts'); ?></label>
-		</p>
-<?php }
-	
-	// Sanitizes, saves and submits the user-generated content.
-	
-	public function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;
-		$new_instance = wp_parse_args( (array) $new_instance, array( 'title' => '', 'count' => 0, 'dropdown' => '') );
-		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['count'] = $new_instance['count'] ? 1 : 0;
-		$instance['dropdown'] = $new_instance['dropdown'] ? 1 : 0;
+		// Display Post
+		echo "teampandajz: ";
+			$args = array('post_type'=>'flowerpost', 'posts_per_page'=>$number);
+			$query = new WP_Query($args);
+			if ($query ->have_posts() ) {
+				echo '<div style="height:20px">&nbsp;</div><div  style="margin-left:50px"><ul class="teampandajz_widget">';
+				$ct=0;
+				$col = 4;
+				$col = max(min($col, $number, $query->found_posts), 1);
+				while($query->have_posts() && $ct++ < $number) {
+					// Will concatenate the variables and output the 'eventItem' string.
+					$query->the_post();
+					$image = (has_post_thumbnail($post->ID)) ? get_the_post_thumbnail($post->ID) : '<div class="thumbnail not found"></div>';
+					if($ct % $col == 0)
+					{
+						$typeflower = '<li style=" width:'.intval(100/$col).'%;display:block;float:right;text-align: center;">';
+					}
+					else
+						$typeflower = '<li style="width:'.intval(100/$col).'%; display:inline-block;float:left;text-align: center;">';
+					$typeflower .= '<div style=" margin:0px 40px; padding:2px;background-color:#e080e0;"><a href="' . get_permalink() . '">'. $image.'<br />';
+					$typeflower .= '<div style="height:60px;"><p style="vertical-align:middle;margin-bottom:0px;">' .get_the_title() . '</p></div></a></div></li>';
 
+					echo $typeflower;
+				}
+				echo '<li style=" width:' . intval(100/$col).'%;display:block;float:right;text-align: center;">&nbsp;<br />';
+				echo '</ul></div><div class="clear">&nbsp;</div>';
+				wp_reset_query();
+				wp_reset_postdata();
+			}
+		}
+
+	// Widget Backend
+	public function form( $instance ) {
+		if ( isset( $instance[ 'title' ] ) ) {
+			$title = $instance[ 'title' ];
+		}
+		else {
+			$title = __( 'New title', 'teampandajz_widget_domain' );
+		}
+
+		$number = get_option('flowerpost_show_settype',0) == 0 ? $instance['number'] : get_option('flowerpost_show_number',3);
+
+	// Widget admin form
+?>
+
+<p>
+<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label>
+<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
+</p>
+<p>
+<label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php _e( 'Number:' ); ?></label>
+<input class="widefat" id="<?php echo $this->get_field_id( 'number' ); ?>" name="<?php echo $this->get_field_name( 'number' ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" />
+</p>
+
+<?php
+	}
+
+	// Updating widget replacing old instances with new
+	public function update( $new_instance, $old_instance ) {
+		$instance = array();
+		$instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
+		$instance['number'] = ( ! empty( $new_instance['number'] ) ) ? strip_tags( $new_instance['number'] ) : '';
+		update_option('flowerpost_show_number', $instance['number']);
+		update_option('flowerpost_show_settype', 0);
 		return $instance;
 	}
-} // Closes the function we opened in step 1
+} // Class teampandajz_widget ends here
 
-// Tells WordPress that this widget has been created and that it should display in the list of available widgets.
 
-add_action( 'widgets_init', function(){
-     register_widget( 'TeamPandaJZYearlyArchivesWidget' );
-});
+
+// Register and load the widget
+
+function teampandajz_load_widget() {
+    register_widget( 'teampandajz_widget' );
+}
+
+add_action( 'widgets_init', 'teampandajz_load_widget' );
+
+
+add_action( 'admin_init', 'flowerpost_plugin_settings' );
+function flowerpost_plugin_settings() {
+	register_setting( 'flowerpost-plugin-settings', 'flowerpost_show_number' );
+	register_setting( 'flowerpost-plugin-settings', 'flowerpost_show_settype' );
+}
+
+add_action('admin_menu', 'flowerpost_plugin_menu');
+function flowerpost_plugin_menu() {
+	add_submenu_page ( get_admin_page_parent ( $parent = '' ), 'flowerpost Plugin Settings', 'Settings', 'administrator', 'flowerpost-plugin-settings', 'flowerpost_plugin_settings_page');
+}
+
+function flowerpost_plugin_settings_page() {
+
+?>
+
+	<div class="wrap">
+	<h2>flowerpost Settings</h2>
+	
+	<form method="post" action="options.php">
+	    <?php settings_fields( 'flowerpost-plugin-settings' ); ?>
+	    <?php do_settings_sections( 'flowerpost-plugin-settings' ); ?>
+	    <table class="form-table">
+	        <tr valign="top">
+	        <th scope="row">Post Number</th>
+	        <td><input type="text" name="flowerpost_show_number" value="<?php echo esc_attr( get_option('flowerpost_show_number') ); ?>" />
+            <input type="hidden" name="flowerpost_show_settype" value="1" />
+            </td>
+	        </tr>
+	    </table>
+	    
+	    <?php submit_button(); ?>
+	
+	</form>
+	</div>
+
+
+<?php  
+
+}
+
+add_shortcode('flowerpost_shortcode', 'flowerpost_shortcode' );
+function flowerpost_shortcode($stts){
+	$number = isset($stts['number']) ? $stts['number'] : get_option('flowerpost_show_number',3);
+	$col = isset($stts['colnum']) ? $stts['colnum'] : 4;
+	$col = max(min($col, $number, $query->found_posts), 1);
+
+	// Display Post
+	$args = array('post_type'=>'flowerpost', 'posts_per_page'=>$number);
+	$query = new WP_Query($args);
+	if ($query ->have_posts() ) {
+		echo '<div style="height:20px">&nbsp;</div><div  style="margin-left:50px"><ul class="teampandajz_widget">';
+		$ct=0;
+		while($query->have_posts() && $ct++ < $number) {
+			// Will concatenate the variables and output the 'eventItem' string.
+			$query->the_post();
+			$image = (has_post_thumbnail($post->ID)) ? get_the_post_thumbnail($post->ID) : '<div class="thumbnail not found"></div>';
+			if($ct % $col == 0)
+			{
+				$typeflower = '<li style=" width:'.intval(100/$col).'%;display:block;float:right;text-align: center;">';
+			}
+			else
+				$typeflower = '<li style="width:'.intval(100/$col).'%; display:inline-block;float:left;text-align: center;">';
+			$typeflower .= '<div style=" margin:0px 40px; padding:2px;background-color:#e080e0;"><a href="' . get_permalink() . '">'. $image.'<br />';
+			$typeflower .= '<div style="height:60px;"><p style="vertical-align:middle;margin-bottom:0px;">' .get_the_title() . '</p></div></a></div></li>';
+
+			echo $typeflower;
+		}
+		echo '<li style=" width:' . intval(100/$col).'%;display:block;float:right;text-align: center;">&nbsp;<br />';
+		echo '</ul></div><div class="clear">&nbsp;</div>';
+		wp_reset_query();
+		wp_reset_postdata();
+	}
+}
+
+?>
