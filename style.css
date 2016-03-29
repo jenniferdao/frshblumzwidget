@@ -1,21 +1,14 @@
 /* Plugin Styling */
 
-.flowerlist
-{
-	color: purple;
-	margin:0px 40px; 
-	padding:2px;
-	background-color:pink;
-}
-
-#thumbnail
+.size-post-thumbnail
 { 
 	border-radius: 20px;
+	width: 360px;
+   	height: 140px;
+   	border: 2px solid #14141f;
 }
 
-.teampandajz_widget
-{
-}
+
 
 .flowerpostbox
 {
@@ -26,13 +19,21 @@
 .flowerpost
 {
 	margin:0px 40px;
-	padding:2px;
-	background-color:#e080e0;
+	padding:4px;
+	background-color:#e52356;
+	border-radius: 20px;
 }
 
 .flowerposttext
 {
 	height:60px;
+	color: #14141f;
+	text-decoration: uppercase;
+	font-family: 'Monotype Corsiva', cursive;
+}
+
+.flowerposttext a{
+	color: red;
 }
 
 .flowerposttext p
