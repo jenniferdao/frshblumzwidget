@@ -1,0 +1,42 @@
+/* Plugin Styling */
+
+.flowerlist
+{
+	color: purple;
+	margin:0px 40px; 
+	padding:2px;
+	background-color:pink;
+}
+
+#thumbnail
+{ 
+	border-radius: 20px;
+}
+
+.teampandajz_widget
+{
+}
+
+.flowerpostbox
+{
+	margin-left:50px;
+}
+
+
+.flowerpost
+{
+	margin:0px 40px;
+	padding:2px;
+	background-color:#e080e0;
+}
+
+.flowerposttext
+{
+	height:60px;
+}
+
+.flowerposttext p
+{
+	vertical-align:middle;
+	margin-bottom:0px;
+}
